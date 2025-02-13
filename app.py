@@ -1,4 +1,5 @@
 from notify_service import SlackNotifier
+from ticket_service import JiraTicketService
 from dotenv import  load_dotenv
 import os
 
@@ -10,4 +11,8 @@ if __name__ == '__main__':
     notifier = SlackNotifier(slack_config)
     notifier.send_notification({ "text": "hello world from aq_agent"})
 
+    jira_config = {}
+    ticket = {}
+    tkt_service = JiraTicketService(jira_config)
+    tkt_service.create_ticket(ticket)
 
