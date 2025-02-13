@@ -1,0 +1,19 @@
+[project]
+name = "aq-agent"
+version = "0.1.0"
+description = "Analytics Query Agent that intelligently handles user requests for analytics reports"
+authors = [
+    {name = "srinivas-tanla",email = "srinivas.mannem@tanla.com"}
+]
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "slack-sdk (>=3.34.0,<4.0.0)",
+    "requests (>=2.32.3,<3.0.0)",
+    "python-dotenv (>=1.0.1,<2.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
