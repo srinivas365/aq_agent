@@ -5,6 +5,7 @@ import os
 import logging
 import uuid
 from vectordb_service import VectorDBService
+from groq_service import GroqBot
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -26,6 +27,9 @@ if __name__ == '__main__':
     # initializing the vectordb service
     dbservice = VectorDBService()
 
+    # initializing the bot
+    bot = GroqBot()
+
 
     while True:
         query = input("report query[enter exit to close]:")
@@ -35,8 +39,13 @@ if __name__ == '__main__':
         for report in results.objects:
             print(f"uuid: {report.uuid}, report: {report.properties['name']}, similarity_score: {report.metadata.distance}")
 
-        feedback = input("Are you satified with the results[y/n]:")
-        if feedback.lower() == "n":
+        feedback = input("Are you satified with the results[agent/ai]:")
+        if feedback.lower() == 'ai':
+            print("Starting Groq chat for further details...")
+            bot.collect_report_details()
+            bot.confirm_and_summarize()
+
+        if feedback.lower() == "agent":
             print("escalating to team......")
             report_text = input("Describe your report in detail:")
             year = input("Any specific year:")
