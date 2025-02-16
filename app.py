@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pymongo
 
 from notify_service import SlackNotifier
@@ -16,6 +18,9 @@ if __name__ == '__main__':
     logging.info("loading config from env")
     logging.info("starting app")
 
+    # initialize mongodb client
+    dbclient = pymongo.MongoClient(os.environ.get("MONGO_URI"))
+
     # initializing the slack service
     slack_config = {
         "webhook_url": os.getenv("SLACK_WEBHOOK_URL")
@@ -23,14 +28,10 @@ if __name__ == '__main__':
     notifier = SlackNotifier(slack_config)
 
     # initializing the ticket service
-    jira_config = {}
-    tkt_service = JiraTicketService(jira_config)
+    tkt_service = JiraTicketService(dbclient)
 
     # initializing the vectordb service
     dbservice = VectorDBService()
-
-    # initialize mongodb client
-    dbclient = pymongo.MongoClient(os.environ.get("MONGO_URI"))
 
     # initializing the bot
     bot = GroqBot(dbclient, notifier)
@@ -44,13 +45,27 @@ if __name__ == '__main__':
             print(f"uuid: {report.uuid}, report: {report.properties['name']}, similarity_score: {report.metadata.distance}")
 
         feedback = input("Are you satified with the results[y/n]:")
+
+        escalated_info = None
+
         if feedback.lower() == 'n':
             print("Starting Groq chat for further details...")
             bot.collect_report_details()
             bot.confirm_and_summarize()
             ticket_id = bot.report_id
-            tkt_service.create_ticket({"ticket_id": ticket_id, "report_details": bot.report_details})
+            escalated_info = {
+                "ticket_id": ticket_id,
+                "report_details": bot.report_details["summary"],
+                "timestamp": datetime.now(),
+                "user_original_query": query,
+            }
+
+        # create ticket if escalated
+        if escalated_info is not None:
+            tkt_service.create_ticket(escalated_info)
             print(f"Ticket has been created with id {ticket_id}. Team will reach you shortly...")
+
+
 
     print(f"Closing the application")
     dbservice.close()
