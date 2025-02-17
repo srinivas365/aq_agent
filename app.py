@@ -36,38 +36,47 @@ if __name__ == '__main__':
     # initializing the bot
     bot = GroqBot(dbclient, notifier)
 
-    while True:
-        query = input("report query[enter exit to close]:")
-        if query == "exit":
-            break
-        results = dbservice.search("articles", query, 2)
-        for report in results.objects:
-            print(f"uuid: {report.uuid}, report: {report.properties['name']}, similarity_score: {report.metadata.distance}")
+    try:
+        while True:
+            query = input("report query[enter exit to close]:")
 
-        feedback = input("Are you satified with the results[y/n]:")
+            if query == "":
+                continue
 
-        escalated_info = None
+            if query == "exit":
+                break
+            results = dbservice.search("articles", query, 2)
+            for report in results.objects:
+                print(
+                    f"uuid: {report.uuid}, report: {report.properties['name']}, similarity_score: {report.metadata.distance}")
 
-        if feedback.lower() == 'n':
-            print("Starting Groq chat for further details...")
-            bot.collect_report_details()
-            bot.confirm_and_summarize()
-            ticket_id = bot.report_id
-            escalated_info = {
-                "ticket_id": ticket_id,
-                "report_details": bot.report_details["summary"],
-                "timestamp": datetime.now(),
-                "user_original_query": query,
-            }
+            feedback = input("Are you satified with the results[y/n]:")
 
-        # create ticket if escalated
-        if escalated_info is not None:
-            tkt_service.create_ticket(escalated_info)
-            print(f"Ticket has been created with id {ticket_id}. Team will reach you shortly...")
+            escalated_info = None
 
+            if feedback.lower() == 'n':
+                print("Starting Groq chat for further details...")
+                bot.collect_report_details()
+                bot.confirm_and_summarize()
+                ticket_id = bot.report_id
+                escalated_info = {
+                    "ticket_id": ticket_id,
+                    "report_details": bot.report_details["summary"],
+                    "timestamp": datetime.now(),
+                    "user_original_query": query,
+                }
 
+            # create ticket if escalated
+            if escalated_info is not None:
+                tkt_service.create_ticket(escalated_info)
+                print(f"Ticket has been created with id {ticket_id}. Team will reach you shortly...")
+            print('\n')
 
-    print(f"Closing the application")
-    dbservice.close()
-    dbclient.close()
+        print(f"Closing the application")
+    except Exception as e:
+        print("exception:", str(e))
+    finally:
+        dbservice.close()
+        dbclient.close()
+
 

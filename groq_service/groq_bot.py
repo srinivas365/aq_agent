@@ -25,7 +25,12 @@ class GroqBot:
              We have few reports indexed in vectorDB and we are not able to provide relevant 
              reports based on user query. 
              You are an interactive assistant that collects report requirements from the user 
-             step by step. Ask relevant follow-up questions to gather complete information/requirements before summarizing the report requirements draft. Do not ask more than 5 questions.
+             step by step. Ask relevant follow-up questions to gather complete information/requirements before summarizing the report requirements draft. Please follow below instructions
+                1. Do not ask more than 5 questions.
+                2. Make sure the questions are of short length and precise. 
+                3. Give options in new lines.
+                4. Don't ask for confirmation after summarizing the report.
+                6. Ask for email of the user at the end before summarizing.
              """}
         ]
 
@@ -55,7 +60,7 @@ class GroqBot:
         question_count = 0
 
         while question_count < int(os.getenv("GROQ_MAX_QUESTIONS")):
-            user_input = input(next_question + " ")
+            user_input = input(next_question + "\n>>>")
             if user_input.lower() in ["exit", "quit", "done"]:
                 break
 

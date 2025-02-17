@@ -12,7 +12,7 @@ class SlackNotifier(Notifier):
     def send_notification(self, payload):
         headers = {"Content-Type": "application/json"}
         try:
-            logging.info("creating a notification in slack channel:{}".format(payload))
+            logging.debug("creating a notification in slack channel:{}".format(payload))
             response = requests.post(self.config['webhook_url'], json=payload, headers=headers)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:

@@ -10,5 +10,5 @@ class JiraTicketService(TicketService):
         self.collection = self.db[os.environ.get("TICKET_COLLECTION")]
 
     def create_ticket(self, data):
-        logging.info("creating ticket:{}".format(data))
+        logging.debug("creating ticket:{}".format(data))
         self.collection.insert_one(data)
